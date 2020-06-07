@@ -2,26 +2,30 @@ class TasksController < ApplicationController
   before_action :set_task, only: [:show, :edit, :update, :destroy]
 
   def index
-    @tasks = Task.all
+    if logged_in?
+      @tasks = current_user.tasks
+    end
   end
 
   def show
   end
 
   def new
-    @task = Task.new
+    @task = current_user.tasks.build
   end
 
   def create
-    @task = Task.new(task_params)
-
+    
+    @task = current_user.tasks.build(task_params)
     if @task.save
-      flash[:success] = 'task が正常に投稿されました'
-      redirect_to @task
+      flash[:success] = 'taskを投稿しました。'
+      redirect_to root_url
     else
-      flash.now[:danger] = 'task が投稿されませんでした'
+      @microposts = current_user.tasks
+      flash.now[:danger] = 'taskの投稿に失敗しました。'
       render :new
     end
+
   end
 
   def edit
@@ -30,7 +34,7 @@ class TasksController < ApplicationController
   def update
     if @task.update(task_params)
       flash[:success] = 'task は正常に更新されました'
-      redirect_to @task
+      redirect_to root_url
     else
       flash.now[:danger] = 'task は更新されませんでした'
       render :edit
